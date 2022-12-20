@@ -1,0 +1,2297 @@
+openapi: 3.0.0
+info:
+  title: Escrow API
+  description: Escrow Backend APIs.
+  version: 0.1.9
+servers:
+  - url: http://localhost:3001
+    description: Development Server
+  - url: http://test.escrow.com
+    description: Test Server
+  - url: http://live.escrow.com
+    description: Live Server
+  - url: https://escrow-api.herokuapp.com
+    description: Temporary Deployment Server  
+paths:
+  /api/auth/register:
+    post:
+      summary: Creates a user.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string 
+                lastname:
+                  type: string  
+                email:
+                  type: string 
+                password:
+                  type: string  
+                password_confirmation:
+                  type: string      
+        
+      responses:
+        '201':
+          description: A user object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Created'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error
+  /api/auth/login:
+    post:
+      summary: Login In as User.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: 
+                email:
+                  type: string 
+                password:
+                  type: string            
+      responses:
+        '200':
+          description: A user object.
+          content:
+            application/json:
+              schema:
+               $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+           content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error     
+  /api/auth/forgotpassword:
+    post:
+      summary: Manage Forgot Password.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: 
+                email:
+                  type: string         
+      responses:
+        '200':
+          description: A Verify Email Exist.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/422'
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/auth/resetpassword:        
+    put:
+      summary: Reset Password.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: 
+                code:
+                  type: string   
+                password:
+                  type: string 
+                password_confirmation:
+                  type: string             
+      responses:
+        '201':
+          description: Reset Successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error  
+  /api/invite/inviteuser:        
+    post:
+      summary: Invite New User to Escrow
+      security:
+        - bearerAuth: []
+      tags:
+        - Invite
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: 
+                name:
+                  type: string   
+                email:
+                  type: string 
+                message_for_invite:
+                  type: string    
+                invitetype:
+                  type: string               
+      responses:
+        '201':
+          description: Invite Sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error  
+  /api/invite/invitee_create_profile:        
+    post:
+      summary: After Invitee Received invite link, the link takes him to complete your profile page 
+      tags:
+        - Invite
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string 
+                lastname:
+                  type: string  
+                email:
+                  type: string 
+                password:
+                  type: string  
+                confirmation_password:
+                  type: string             
+      responses:
+        '201':
+          description: Profile Created Successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error  
+  /api/profile/complete_profile:        
+    post:
+      summary: Add another required personal Information 
+      security:
+        - bearerAuth: []
+      tags:
+        - Profile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                profile_image:
+                  type: string
+                  format: binary
+                gender:
+                  type: string 
+                country:
+                  type: int  
+                state:
+                  type: int 
+                city:
+                  type: int  
+                address:
+                  type: string  
+                phone_number:
+                  type: string       
+                accounttype:
+                  type: string         
+      responses:
+        '201':
+          description: Profile Updated Successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/profile/updateaccounttype:        
+    post:
+      summary: Change Account Type 
+      security:
+        - bearerAuth: []
+      tags:
+        - Profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                account_type:
+                  type: string        
+      responses:
+        '201':
+          description: Account Type Updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error         
+  /api/company/create_company:        
+    post:
+      summary: Create Company Profile
+      security:
+        - bearerAuth: []
+      tags:
+        - Company
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  format: binary
+                address:
+                  type: string             
+      responses:
+        '201':
+          description: Company Created Successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error  
+  /api/company/get_company:        
+    get:
+      summary: Get Company Profile
+      security:
+        - bearerAuth: []
+      tags:
+        - Company            
+      responses:
+        '200':
+          description: Company Retrieved Successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error  
+  /api/company/edit_company/{companyId}:        
+    put:
+      summary: Edit Company Profile
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: companyId
+          schema:
+            type: integer
+          required: true
+          description: Company Id to Edit  
+      tags:
+        - Company
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  format: binary
+                address:
+                  type: string             
+      responses:
+        '201':
+          description: Company Created Successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error  
+  /api/company/invite:        
+    post:
+      summary: Invite My Company Staff to Escrow
+      security:
+        - bearerAuth: []
+      tags:
+        - Company
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: 
+                name:
+                  type: string   
+                email:
+                  type: string 
+                message_for_invite:
+                  type: string    
+                invitetype:
+                  type: string               
+      responses:
+        '201':
+          description: Invite Sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/company/get_invite/{invitetype}:        
+    get:
+      summary: Get All Company Invited Staff
+      parameters:
+        - in: path
+          name: invitetype
+          schema:
+            type: string
+          required: true
+          description: Invite Type 
+      security:
+        - bearerAuth: []
+      tags:
+        - Company        
+      responses:
+        '201':
+          description: Invite Sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/invite/get_invite/{invitetype}:        
+    get:
+      summary: Get All Invited Users
+      parameters:
+        - in: path
+          name: invitetype
+          schema:
+            type: string
+          required: true
+          description: Invite Type 
+      security:
+        - bearerAuth: []
+      tags:
+        - Invite        
+      responses:
+        '200':
+          description: Retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/address/countries:        
+    get:
+      summary: Get All Country
+      security:
+        - bearerAuth: []
+      tags:
+        - Address        
+      responses:
+        '200':
+          description: Retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/address/states/{countryId}:        
+    get:
+      summary: Get All State in my Country
+      parameters:
+        - in: path
+          name: countryId
+          schema:
+            type: integer
+          required: true
+          description: Get All State in my Country
+      security:
+        - bearerAuth: []
+      tags:
+        - Address        
+      responses:
+        '200':
+          description: Retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/address/cities/{stateId}:        
+    get:
+      summary: Get All Cities in my State
+      parameters:
+        - in: path
+          name: stateId
+          schema:
+            type: integer
+          required: true
+          description: Get All Cities in my State
+      security:
+        - bearerAuth: []
+      tags:
+        - Address        
+      responses:
+        '200':
+          description: Retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/transaction/create_transaction:        
+    post:
+      summary: Start a New Trasnsaction
+      security:
+        - bearerAuth: []
+      tags:
+        - Transaction        
+      responses:
+        '201':
+          description: Created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error  
+  /api/transaction/get_transactions:        
+    get:
+      summary: Get all transactions
+      security:
+        - bearerAuth: []
+      tags:
+        - Transaction        
+      responses:
+        '200':
+          description: Retreived.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error  
+  /api/transaction/get_witnesses/{transactionId}:        
+    get:
+      summary: Get specific transaction
+      parameters:
+        - in: path
+          name: transactionId
+          schema:
+            type: integer
+          required: true
+          description: Transaction ID
+      security:
+        - bearerAuth: []
+      tags:
+        - Transaction        
+      responses:
+        '200':
+          description: Retreived.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error   
+  /api/transaction/get_transaction/{transactionId}:        
+    get:
+      summary: Get specific transaction
+      parameters:
+        - in: path
+          name: transactionId
+          schema:
+            type: integer
+          required: true
+          description: Transaction ID
+      security:
+        - bearerAuth: []
+      tags:
+        - Transaction        
+      responses:
+        '200':
+          description: Retreived.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error                          
+  /api/order/create_order:        
+    post:
+      summary: Create New Order
+      security:
+        - bearerAuth: []
+      tags:
+        - Order  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                quantity:
+                  type: integer  
+                unit_cost:
+                  type: integer 
+                total_cost:
+                  type: integer 
+                order_description:
+                  type: string   
+                other_information:
+                  type: string
+                mode_of_delivery:
+                  type: string
+                date_of_delivery:
+                  type: string  
+                transactionId:
+                  type: integer                               
+      responses:
+        '201':
+          description: Retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error
+  /api/invite/receiveInvitedUser:        
+    post:
+      summary: Create Profile for new Invite
+      security:
+        - bearerAuth: []
+      tags:
+        - Invite  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string  
+                email:
+                  type: string 
+                password:
+                  type: string 
+                password_confirmation:
+                  type: string                          
+      responses:
+        '201':
+          description: Created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error        
+  /api/transaction/transactionwith:        
+    post:
+      summary: Add Other Party to Transaction
+      security:
+        - bearerAuth: []
+      tags:
+        - Transaction  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string 
+                otherparty_category:
+                  type: string    
+                transactionId:
+                  type: integer                               
+      responses:
+        '201':
+          description: Created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/transaction/transactionwith/{transactionId}:        
+    get:
+      summary: Get Other Party User
+      parameters:
+        - in: path
+          name: transactionId
+          schema:
+            type: integer
+          required: true
+          description: Get transactionId
+      
+      security:
+        - bearerAuth: []
+      tags:
+        - Transaction  
+      responses:
+        '200':
+          description: Retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error               
+  /api/transaction/add_witness:        
+    post:
+      summary: Add Other Party to Transaction
+      security:
+        - bearerAuth: []
+      tags:
+        - Transaction  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string   
+                transactionId:
+                  type: integer                               
+      responses:
+        '201':
+          description: Created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/transaction/update_transaction:        
+    post:
+      summary: Update Transaction Request Approved by other party etc
+      security:
+        - bearerAuth: []
+      tags:
+        - Transaction  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                transactionId:
+                  type: integer                                
+      responses:
+        '201':
+          description: Created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error                        
+  /api/order/add_otherparty_to_order/{orderId}:        
+    post:
+      summary: Add Other Party to Order 
+      parameters:
+        - in: path
+          name: orderId
+          schema:
+            type: integer
+          required: true
+          description: Order ID
+      security:
+        - bearerAuth: []
+      tags:
+        - Order  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string                                 
+      responses:
+        '201':
+          description: Created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error         
+  /api/order/add_witness/{orderId}:        
+    post:
+      summary: Add Witness to Order 
+      parameters:
+        - in: path
+          name: orderId
+          schema:
+            type: integer
+          required: true
+          description: Order ID
+      security:
+        - bearerAuth: []
+      tags:
+        - Order  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string                                 
+      responses:
+        '201':
+          description: Created Successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error
+  /api/order/get_order:        
+    get:
+      summary: Get All Orders
+      security:
+        - bearerAuth: []
+      tags:
+        - Order  
+      responses:
+        '200':
+          description: Retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/order/edit_order:        
+    put:
+      summary: Edit Order Request
+      security:
+        - bearerAuth: []
+      tags:
+        - Order  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                quantity:
+                  type: integer  
+                unit_cost:
+                  type: integer 
+                total_cost:
+                  type: integer 
+                order_description:
+                  type: string   
+                other_information:
+                  type: string
+                mode_of_delivery:
+                  type: string
+                date_of_delivery:
+                  type: string  
+                orderId:
+                  type: integer                                
+      responses:
+        '201':
+          description: Created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error         
+  /api/order/delete_order/{orderId}:        
+    delete:
+      summary: Delete Order
+      parameters:
+        - in: path
+          name: orderId
+          schema:
+            type: integer
+          required: true
+          description: Delete An Order
+      security:
+        - bearerAuth: []
+      tags:
+        - Order  
+      responses:
+        '200':
+          description: Deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error         
+  /api/order/get_order/{order_id}:        
+    get:
+      summary: Get Details on Order
+       parameters:
+        - in: path
+          name: order_id
+          schema:
+            type: integer
+          required: true
+          description: Get An Order
+      security:
+        - bearerAuth: []
+      tags:
+        - Order  
+      responses:
+        '200':
+          description: Retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/witness/create/{order_id}:        
+    post:
+      summary: Add Witness to Order Request
+       parameters:
+        - in: path
+          name: order_id
+          schema:
+            type: integer
+          required: true
+          description: Get An Order
+      security:
+        - bearerAuth: []
+      tags:
+        - Witness  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string  
+                message_to_invite:
+                  type: string                          
+      responses:
+        '201':
+          description: Retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/witness/get/{order_id}:        
+    get:
+      summary: Get Witnesses on Order
+       parameters:
+        - in: path
+          name: order_id
+          schema:
+            type: integer
+          required: true
+          description: Get An Order
+      security:
+        - bearerAuth: []
+      tags:
+        - Witness  
+      responses:
+        '200':
+          description: Retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/witness/remove/{order_id}:        
+    delete:
+      summary: Remove a Witness
+       parameters:
+        - in: path
+          name: order_id
+          schema:
+            type: integer
+          required: true
+          description: Order ID
+      security:
+        - bearerAuth: []
+      tags:
+        - Witness  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                quantity:
+                  type: integer  
+                unit_cost:
+                  type: integer 
+                total_cost:
+                  type: integer 
+                order_description:
+                  type: string   
+                other_information:
+                  type: string
+                mode_of_delivery:
+                  type: string
+                date_of_delivery:
+                  type: string
+                otherpartyId:
+                  type: integer
+                otherparty_category:
+                  type: string                        
+      responses:
+        '200':
+          description: Retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/agreement/create_agreement:        
+    post:
+      summary: Upload a Contract 
+      security:
+        - bearerAuth: []
+      tags:
+        - Agreement  
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                document:
+                  type: string
+                  format: binary  
+                transactionId:
+                  type: integer                       
+      responses:
+        '200':
+          description: Created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/agreement/get_agreement/{transactionId}:        
+    get:
+      summary: Get Contract 
+      parameters:
+        - in: path
+          name: transactionId
+          schema:
+            type: string
+          required: true
+          description: Transaction ID
+      security:
+        - bearerAuth: []
+      tags:
+        - Agreement                     
+      responses:
+        '200':
+          description: Retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/message/send:        
+    post:
+      summary: Send Message 
+      security:
+        - bearerAuth: []
+      tags:
+        - Message 
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string 
+                transactionId:
+                  type: integer                        
+      responses:
+        '201':
+          description: Send Message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/message/get/{transactionId}:        
+    get:
+      summary: Get Messages
+      parameters:
+        - in: path
+          name: transactionId
+          schema:
+            type: integer
+          required: true
+          description: Transaction ID
+      security:
+        - bearerAuth: []
+      tags:
+        - Message                         
+      responses:
+        '200':
+          description: Get Sent Mesages.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/witnessview/invitedtransactions:        
+    get:
+      summary: Get Transactions
+      security:
+        - bearerAuth: []
+      tags:
+        - Witness View                         
+      responses:
+        '200':
+          description: Get data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/witnessview/send:        
+    post:
+      summary: Add Message
+      security:
+        - bearerAuth: []
+      tags:
+        - Witness View  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string 
+                transactionId:
+                  type: integer                            
+      responses:
+        '200':
+          description: Add data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/witnessview/get_message/{transactionId}:        
+    get:
+      summary: Get Messages
+      parameters:
+        - in: path
+          name: transactionId
+          schema:
+            type: integer
+          required: true
+          description: Transaction ID
+      security:
+        - bearerAuth: []
+      tags:
+        - Witness View                         
+      responses:
+        '200':
+          description: Add data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error
+  /api/profile/allusers:        
+    get:
+      summary: Get All Users
+      security:
+        - bearerAuth: []
+      tags:
+        - Users            
+      responses:
+        '200':
+          description: All Users Retrieved Successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error
+  /api/payment/initiate_payment:
+    post:
+      summary: Initiate Payment.
+      tags:
+        - Payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: 
+                amount:
+                  type: number 
+                transactionId:
+                  type: string
+                redirect_url:
+                  type: string            
+      responses:
+        '200':
+          description: A payment object.
+          content:
+            application/json:
+              schema:
+               $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+           content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error
+  /api/payment/webhook:
+    post:
+      summary: Webhook url to be used by the payment gateway.
+      tags:
+        - Payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: 
+                body:
+                  type: object            
+      responses:
+        '200':
+          description: webhook event object.
+          content:
+            application/json:
+              schema:
+               $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+           content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error
+  /api/setting/create_setting:
+    post:
+      summary: create setting.
+      tags:
+        - Setting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: 
+                secret_key:
+                  type: string 
+                application_id:
+                  type: string
+                product_id:
+                  type: string            
+      responses:
+        '200':
+          description: A setting object.
+          content:
+            application/json:
+              schema:
+               $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+           content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error
+  /api/setting/get_setting:        
+    get:
+      summary: Get Setting
+      security:
+        - bearerAuth: []
+      tags:
+        - Setting            
+      responses:
+        '200':
+          description: Setting Retrieved Successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error 
+  /api/setting/edit_setting/{settingId}:        
+    put:
+      summary: Edit Setting
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: settingId
+          schema:
+            type: integer
+          required: true
+          description: Setting Id to Edit  
+      tags:
+        - Setting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                secret_key:
+                  type: string
+                application_id:
+                  type: string
+                product_id:
+                  type: string
+                testmode:
+                  type: integer               
+      responses:
+        '201':
+          description: Company Created Successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchObject'
+        '422':
+          description: Invalid Input.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  error:
+                    type: array
+                    example: ''
+        '404':
+          description: Unknown Route.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        default:
+          description: Unexpected error                                                         
+components:
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    # Schema for error response body
+    NotFound:
+      type: object
+      properties:
+        success:
+          type: boolean,
+          example: false
+        error:
+          type: object
+          example: { message : "Not Found"} 
+    Created:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string  
+        data:
+          type: object 
+    FetchObject:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string  
+        data:
+          type: object            
+    NotAuthorized:
+      type: object
+      properties:
+        success:
+          type: boolean,
+          example: false
+        error:
+          type: object
+          example: { message : "Access Denied"}               

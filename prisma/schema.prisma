@@ -1,0 +1,263 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int       @id @default(autoincrement()) 
+  firstname      String    @db.VarChar(255)
+  lastname       String    @db.VarChar(255)
+  email          String    @unique
+  email_verified DateTime?
+  active         Boolean   @default(false)
+  password       String
+  account_type   String    @default("Individual")
+  profile_image  String?
+  country        Country?    @relation(fields: [countryId], references: [id])
+  countryId      Int?
+  state          State?    @relation(fields: [stateId], references: [id])
+  stateId        Int?
+  city           City?    @relation(fields: [cityId], references: [id])
+  cityId         Int?
+  address        String?
+  companyId      Int?
+  company_admin  Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  gender         String?
+  company        Company?  @relation(fields: [companyId], references: [id])
+  invited        Invitee[] @relation("invited")
+  profile        Invitee?  @relation("profile")
+  phone_number   String?
+  witness         Witness[]    @relation("witness_connect")
+  transaction_startedBy Transaction[] @relation("transaction_start")
+  transaction_with      Transaction[] @relation("transaction_with")
+  transaction_flow_updateBy TransactionFlow[] @relation(name:"flow_update")
+  agreement      Agreement[]   @relation("doc")
+  message        Message[]       @relation("message")
+  bank           BankInformation?  @relation("bank")
+  @@index([companyId], name: "companyId")
+  @@map("users")
+}
+
+model Company {
+  id        Int      @id @default(autoincrement())
+  name      String
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User[]
+
+  @@map("companies")
+}
+
+model Invitee {
+  id                 Int      @id @default(autoincrement())
+  name               String
+  email              String   @unique
+  message_for_invite String?  @db.LongText
+  invitedById        Int? 
+  inviteType         String?  @default("Individual")
+  profileId          Int? 
+  invitedBy          User?    @relation("invited", fields: [invitedById], references: [id])
+  myprofile          User?    @relation("profile", fields: [profileId], references: [id])
+  transaction_link   Invite_Transaction_Link[]    @relation("invite_link")
+  witness_link       Invite_Witness_Link[]    @relation("witness_invite_link")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  @@index([invitedById], name: "invitedById")
+  @@map("invitees")
+}
+
+model PasswordReset {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  email     String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("passwordresets")
+}
+
+
+model Country {
+  id         Int    @id @default(autoincrement())
+  sortname   String    @db.VarChar(255)
+  name       String    @db.VarChar(255)
+  phonecode  String    @db.VarChar(255)
+  state      State[]
+  user       User[]
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
+}
+
+model State {
+  id         Int    @id @default(autoincrement())
+  name       String    @db.VarChar(255)
+  country_id Int    
+  country    Country @relation(fields: [country_id], references: [id])
+  city       City[]
+  user       User[]
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
+
+  @@index([country_id], name: "states_country_id_foreign")
+}
+
+model City {
+  id         Int    @id @default(autoincrement()) 
+  name       String    @db.VarChar(255)
+  state_id   Int   
+  state      State    @relation(fields: [state_id], references: [id])
+  user       User[]
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
+
+  @@index([state_id], name: "cities_state_id_foreign")
+}
+
+model Transaction {
+  id                Int @id @default(autoincrement())
+  transactionID     String?
+  startedById       Int
+  startedBy         User @relation(name:"transaction_start", fields:[startedById],references:[id])
+  transactionwithId  Int?
+  transactionwith   User? @relation(name:"transaction_with", fields:[transactionwithId], references:[id])
+  transaction_status  String @default("Pending")
+  otherparty_category String?
+  order      Order[]   @relation(name:"transaction_order")
+  transactionwith_invite  Invite_Transaction_Link?    @relation("transaction_link")
+  witness_invite  Invite_Witness_Link[] @relation(name:"witness_link")
+  witness   Witness[]   @relation(name: "transaction_connect")
+  transaction_update  TransactionFlow[] @relation(name:"flow")
+  transaction_agreement  Agreement[]  @relation("transaction_agreement")
+  transaction_message Message[]  @relation("transaction_message")
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
+  @@map("transactions")
+}
+
+model Order {
+  id          Int @id @default(autoincrement())
+  orderId     Int
+  name        String
+  quantity    Int
+  unit_cost   Int
+  total_cost  Int
+  mode_of_delivery  String?   @db.VarChar(255)
+  date_of_delivery  DateTime? @db.Date()
+  transactionId Int
+  transaction   Transaction  @relation(name:"transaction_order", fields: [transactionId], references:[id])
+  order_description String  @db.LongText()
+  other_information String  @db.LongText()
+  order_status  String @default("Pending")
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
+  @@map("orders")
+
+}
+
+model Witness {
+  id          Int @id @default(autoincrement())
+  witnessId   Int
+  user        User @relation(name:"witness_connect", fields:[witnessId],references:[id])
+  transactionId  Int
+  transaction    Transaction @relation(name: "transaction_connect", fields:[transactionId], references:[id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("witnesses")
+}
+
+model Invite_Transaction_Link {
+  id         Int @id @default(autoincrement())
+  type       String @db.VarChar(191)
+  inviteId   Int
+  invite     Invitee @relation(name:"invite_link", fields:[inviteId], references:[id])
+  transactionId Int
+  transaction  Transaction @relation(name:"transaction_link",fields: [transactionId],references:[id]) 
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  
+  @@map("invite_transaction_links")
+}
+
+model Invite_Witness_Link {
+  id         Int @id @default(autoincrement())
+  type       String
+  inviteId   Int
+  invite     Invitee @relation(name:"witness_invite_link", fields:[inviteId], references:[id])
+  transactionId Int
+  transaction  Transaction @relation(name:"witness_link",fields: [transactionId],references:[id]) 
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("invite_witness_links")
+}
+
+model TransactionFlow {
+  id      Int @id @default(autoincrement())
+  transactionId Int
+  transaction   Transaction @relation(name:"flow",fields:[transactionId],references:[id])
+  stage      String
+  status     String
+  date_stage  DateTime  @db.Date()
+  userId Int
+  user User @relation(name:"flow_update",fields:[userId],references:[id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("transactionflows")
+}
+
+model Agreement {
+  id  Int @id @default(autoincrement())
+  document  String
+  transactionId Int
+  transaction   Transaction @relation(name:"transaction_agreement",fields:[transactionId],references:[id])
+  uploadedById   Int?
+  uploadedBy     User? @relation(name:"doc", fields:[uploadedById],references:[id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  @@map("agreements")
+}
+
+model Message {
+  id  Int @id @default(autoincrement())
+  message String  @db.LongText
+  transactionId Int
+  transaction   Transaction @relation(name:"transaction_message",fields:[transactionId],references:[id])
+  sendById   Int?
+  sendBy     User? @relation(name:"message", fields:[sendById],references:[id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  @@map("messages")
+
+}
+
+model BankInformation {
+  id  Int @id @default(autoincrement())
+  bank_name String  
+  account_number  String
+  account_name    String
+  ownerId   Int?
+  owner     User? @relation(name:"bank", fields:[ownerId],references:[id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Setting {
+  id  Int @id @default(autoincrement())
+  secret_key String  
+  application_id  String
+  product_id   String
+  testmode     Int @default(1)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  @@map("setting")
+}
